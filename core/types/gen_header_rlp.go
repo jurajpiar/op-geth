@@ -37,62 +37,51 @@ func (obj *Header) EncodeRLP(_w io.Writer) error {
 	w.WriteBytes(obj.Extra)
 	w.WriteBytes(obj.MixDigest[:])
 	w.WriteBytes(obj.Nonce[:])
-	_tmp1 := obj.EthBaseFee != nil
-	_tmp2 := obj.RskMinimumGasPrice != nil
-	_tmp3 := obj.WithdrawalsHash != nil
-	_tmp4 := obj.BlobGasUsed != nil
-	_tmp5 := obj.ExcessBlobGas != nil
-	_tmp6 := obj.ParentBeaconRoot != nil
-	_tmp7 := obj.RequestsHash != nil
-	if _tmp1 || _tmp2 || _tmp3 || _tmp4 || _tmp5 || _tmp6 || _tmp7 {
-		if obj.EthBaseFee == nil {
+	_tmp1 := obj.BaseFee != nil
+	_tmp2 := obj.WithdrawalsHash != nil
+	_tmp3 := obj.BlobGasUsed != nil
+	_tmp4 := obj.ExcessBlobGas != nil
+	_tmp5 := obj.ParentBeaconRoot != nil
+	_tmp6 := obj.RequestsHash != nil
+	if _tmp1 || _tmp2 || _tmp3 || _tmp4 || _tmp5 || _tmp6 {
+		if obj.BaseFee == nil {
 			w.Write(rlp.EmptyString)
 		} else {
-			if obj.EthBaseFee.Sign() == -1 {
+			if obj.BaseFee.Sign() == -1 {
 				return rlp.ErrNegativeBigInt
 			}
-			w.WriteBigInt(obj.EthBaseFee)
+			w.WriteBigInt(obj.BaseFee)
 		}
 	}
-	if _tmp2 || _tmp3 || _tmp4 || _tmp5 || _tmp6 || _tmp7 {
-		if obj.RskMinimumGasPrice == nil {
-			w.Write(rlp.EmptyString)
-		} else {
-			if obj.RskMinimumGasPrice.Sign() == -1 {
-				return rlp.ErrNegativeBigInt
-			}
-			w.WriteBigInt(obj.RskMinimumGasPrice)
-		}
-	}
-	if _tmp3 || _tmp4 || _tmp5 || _tmp6 || _tmp7 {
+	if _tmp2 || _tmp3 || _tmp4 || _tmp5 || _tmp6 {
 		if obj.WithdrawalsHash == nil {
 			w.Write([]byte{0x80})
 		} else {
 			w.WriteBytes(obj.WithdrawalsHash[:])
 		}
 	}
-	if _tmp4 || _tmp5 || _tmp6 || _tmp7 {
+	if _tmp3 || _tmp4 || _tmp5 || _tmp6 {
 		if obj.BlobGasUsed == nil {
 			w.Write([]byte{0x80})
 		} else {
 			w.WriteUint64((*obj.BlobGasUsed))
 		}
 	}
-	if _tmp5 || _tmp6 || _tmp7 {
+	if _tmp4 || _tmp5 || _tmp6 {
 		if obj.ExcessBlobGas == nil {
 			w.Write([]byte{0x80})
 		} else {
 			w.WriteUint64((*obj.ExcessBlobGas))
 		}
 	}
-	if _tmp6 || _tmp7 {
+	if _tmp5 || _tmp6 {
 		if obj.ParentBeaconRoot == nil {
 			w.Write([]byte{0x80})
 		} else {
 			w.WriteBytes(obj.ParentBeaconRoot[:])
 		}
 	}
-	if _tmp7 {
+	if _tmp6 {
 		if obj.RequestsHash == nil {
 			w.Write([]byte{0x80})
 		} else {

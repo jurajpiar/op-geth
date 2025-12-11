@@ -199,7 +199,7 @@ func (o *BlockOverrides) MakeHeader(header *types.Header) *types.Header {
 		h.MixDigest = *o.PrevRandao
 	}
 	if o.BaseFeePerGas != nil {
-		h.EthBaseFee = o.BaseFeePerGas.ToInt()
+		h.BaseFee = o.BaseFeePerGas.ToInt()
 	}
 	return h
 }

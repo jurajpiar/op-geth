@@ -215,7 +215,7 @@ func (t *BlockTest) genesis(config *params.ChainConfig) *core.Genesis {
 		Mixhash:       t.json.Genesis.MixHash,
 		Coinbase:      t.json.Genesis.Coinbase,
 		Alloc:         t.json.Pre,
-		EthBaseFee:    t.json.Genesis.BaseFeePerGas,
+		BaseFee:       t.json.Genesis.BaseFeePerGas,
 		BlobGasUsed:   t.json.Genesis.BlobGasUsed,
 		ExcessBlobGas: t.json.Genesis.ExcessBlobGas,
 	}

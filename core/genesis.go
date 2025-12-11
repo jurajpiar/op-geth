@@ -71,7 +71,7 @@ type Genesis struct {
 	Number        uint64      `json:"number"`
 	GasUsed       uint64      `json:"gasUsed"`
 	ParentHash    common.Hash `json:"parentHash"`
-	EthBaseFee    *big.Int    `json:"baseFeePerGas"` // EIP-1559
+	BaseFee       *big.Int    `json:"baseFeePerGas"` // EIP-1559
 	ExcessBlobGas *uint64     `json:"excessBlobGas"` // EIP-4844
 	BlobGasUsed   *uint64     `json:"blobGasUsed"`   // EIP-4844
 
@@ -79,8 +79,6 @@ type Genesis struct {
 	// Chains with history pruning, or extraordinarily large genesis allocation (e.g. after a regenesis event)
 	// may utilize this to get started, and then state-sync the latest state, while still verifying the header chain.
 	StateHash *common.Hash `json:"stateHash,omitempty"`
-
-	RskMinimumGasPrice *big.Int `json:"minimumGasPrice,omitempty"`
 }
 
 // copy copies the genesis.
@@ -127,7 +125,7 @@ func ReadGenesis(db ethdb.Database) (*Genesis, error) {
 	genesis.Difficulty = genesisHeader.Difficulty
 	genesis.Mixhash = genesisHeader.MixDigest
 	genesis.Coinbase = genesisHeader.Coinbase
-	genesis.EthBaseFee = genesisHeader.BaseFee()
+	genesis.BaseFee = genesisHeader.BaseFee
 	genesis.ExcessBlobGas = genesisHeader.ExcessBlobGas
 	genesis.BlobGasUsed = genesisHeader.BlobGasUsed
 	// A nil or empty alloc, with a non-matching state-root in the block header, intents to override the state-root.
@@ -136,7 +134,6 @@ func ReadGenesis(db ethdb.Database) (*Genesis, error) {
 		genesis.StateHash = &h
 		genesis.Alloc = nil
 	}
-	genesis.RskMinimumGasPrice = genesisHeader.RskMinimumGasPrice
 
 	return &genesis, nil
 }
@@ -628,19 +625,14 @@ func (g *Genesis) toBlockWithRoot(stateRoot, storageRootMessagePasser common.Has
 		Extra:      g.ExtraData,
 		GasLimit:   g.GasLimit,
 		GasUsed:    g.GasUsed,
-		EthBaseFee: g.EthBaseFee,
+		BaseFee:    g.BaseFee,
 		Difficulty: g.Difficulty,
 		MixDigest:  g.Mixhash,
 		Coinbase:   g.Coinbase,
 		Root:       stateRoot,
 	}
 
-	fmt.Println("g.RskMinimumGasPrice", g.RskMinimumGasPrice)
 	fmt.Println("g.Config.IsOptimism", g.Config.IsOptimism())
-
-	if g.RskMinimumGasPrice != nil {
-		head.RskMinimumGasPrice = g.RskMinimumGasPrice
-	}
 
 	if g.GasLimit == 0 {
 		head.GasLimit = params.GenesisGasLimit
@@ -653,10 +645,10 @@ func (g *Genesis) toBlockWithRoot(stateRoot, storageRootMessagePasser common.Has
 		}
 	}
 	if g.Config != nil && g.Config.IsLondon(common.Big0) {
-		if g.EthBaseFee != nil {
-			head.EthBaseFee = g.EthBaseFee
+		if g.BaseFee != nil {
+			head.BaseFee = g.BaseFee
 		} else {
-			head.EthBaseFee = new(big.Int).SetUint64(params.InitialBaseFee)
+			head.BaseFee = new(big.Int).SetUint64(params.InitialBaseFee)
 		}
 	}
 	var withdrawals []*types.Withdrawal
@@ -782,13 +774,14 @@ func EnableVerkleAtGenesis(db ethdb.Database, genesis *Genesis) (bool, error) {
 
 // DefaultRootstockTestnetGenesisBlock returns the Rootstock testnet genesis block.
 func DefaultRootstockTestnetGenesisBlock() *Genesis {
+	fmt.Println("op-geth/core/genesis.go:777 ~ WARNING: -------------- accessing DefaultRootstockTestnetGenesisBlock --------------")
 	return &Genesis{
 		Config:     params.RootstockTestnetChainConfig,
 		Nonce:      0,
 		ExtraData:  []byte("Rootstock Testnet"),
 		GasLimit:   6800000,
 		Difficulty: big.NewInt(0x01),
-		Alloc:      decodePrealloc(rootstockTestnetAllocData),
+		Alloc:      types.GenesisAlloc{},
 	}
 }
 
@@ -850,7 +843,7 @@ func DeveloperGenesisBlock(gasLimit uint64, faucet *common.Address) *Genesis {
 	genesis := &Genesis{
 		Config:     &config,
 		GasLimit:   gasLimit,
-		EthBaseFee: big.NewInt(params.InitialBaseFee),
+		BaseFee:    big.NewInt(params.InitialBaseFee),
 		Difficulty: big.NewInt(0),
 		Alloc: map[common.Address]types.Account{
 			common.BytesToAddress([]byte{0x01}): {Balance: big.NewInt(1)}, // ECRecover

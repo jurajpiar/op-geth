@@ -86,7 +86,7 @@ func generateMergeChain(n int, merged bool) (*core.Genesis, []*types.Block) {
 		},
 		ExtraData:  []byte("test genesis"),
 		Timestamp:  9000,
-		EthBaseFee: big.NewInt(params.InitialBaseFee),
+		BaseFee:    big.NewInt(params.InitialBaseFee),
 		Difficulty: big.NewInt(0),
 	}
 	testNonce := uint64(0)

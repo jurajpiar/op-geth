@@ -48,7 +48,7 @@ func TestGeneratePOSChain(t *testing.T) {
 				address:                   {Balance: funds},
 				params.BeaconRootsAddress: {Code: params.BeaconRootsCode},
 			},
-			EthBaseFee: big.NewInt(params.InitialBaseFee),
+			BaseFee:    big.NewInt(params.InitialBaseFee),
 			Difficulty: common.Big1,
 			GasLimit:   5_000_000,
 		}

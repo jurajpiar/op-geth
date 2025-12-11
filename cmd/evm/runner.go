@@ -280,7 +280,7 @@ func runCmd(ctx *cli.Context) error {
 		Time:        genesisConfig.Timestamp,
 		Coinbase:    genesisConfig.Coinbase,
 		BlockNumber: new(big.Int).SetUint64(genesisConfig.Number),
-		BaseFee:     genesisConfig.EthBaseFee,
+		BaseFee:     genesisConfig.BaseFee,
 		BlobHashes:  blobHashes,
 		BlobBaseFee: blobBaseFee,
 		EVMConfig: vm.Config{

@@ -42,7 +42,7 @@ var (
 		Alloc: types.GenesisAlloc{
 			address: {Balance: funds},
 		},
-		EthBaseFee: big.NewInt(params.InitialBaseFee),
+		BaseFee: big.NewInt(params.InitialBaseFee),
 	}
 	signer = types.LatestSigner(gspec.Config)
 )

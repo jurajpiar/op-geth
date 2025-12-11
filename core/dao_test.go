@@ -34,8 +34,8 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 
 	// Generate a common prefix for both pro-forkers and non-forkers
 	gspec := &Genesis{
-		EthBaseFee: big.NewInt(params.InitialBaseFee),
-		Config:     &chainConfig,
+		BaseFee: big.NewInt(params.InitialBaseFee),
+		Config:  &chainConfig,
 	}
 	genDb, prefix, _ := GenerateChainWithGenesis(gspec, ethash.NewFaker(), int(forkBlock.Int64()-1), func(i int, gen *BlockGen) {})
 
@@ -46,8 +46,8 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 	proConf.DAOForkBlock = forkBlock
 	proConf.DAOForkSupport = true
 	progspec := &Genesis{
-		EthBaseFee: big.NewInt(params.InitialBaseFee),
-		Config:     &proConf,
+		BaseFee: big.NewInt(params.InitialBaseFee),
+		Config:  &proConf,
 	}
 	proBc, _ := NewBlockChain(proDb, progspec, ethash.NewFaker(), nil)
 	defer proBc.Stop()
@@ -58,8 +58,8 @@ func TestDAOForkRangeExtradata(t *testing.T) {
 	conConf.DAOForkBlock = forkBlock
 	conConf.DAOForkSupport = false
 	congspec := &Genesis{
-		EthBaseFee: big.NewInt(params.InitialBaseFee),
-		Config:     &conConf,
+		BaseFee: big.NewInt(params.InitialBaseFee),
+		Config:  &conConf,
 	}
 	conBc, _ := NewBlockChain(conDb, congspec, ethash.NewFaker(), nil)
 	defer conBc.Stop()
