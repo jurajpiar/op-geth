@@ -597,11 +597,12 @@ func (ec *Client) SuggestGasPrice(ctx context.Context) (*big.Int, error) {
 // SuggestGasTipCap retrieves the currently suggested gas tip cap after 1559 to
 // allow a timely execution of a transaction.
 func (ec *Client) SuggestGasTipCap(ctx context.Context) (*big.Int, error) {
-	var hex hexutil.Big
-	if err := ec.c.CallContext(ctx, &hex, "eth_maxPriorityFeePerGas"); err != nil {
-		return nil, err
-	}
-	return (*big.Int)(&hex), nil
+	return ec.SuggestGasPrice(ctx) // RSK doesn't support EIP-1559, so we use the same as SuggestGasPrice
+	// var hex hexutil.Big
+	// if err := ec.c.CallContext(ctx, &hex, "eth_maxPriorityFeePerGas"); err != nil {
+	// 	return nil, err
+	// }
+	// return (*big.Int)(&hex), nil
 }
 
 // BlobBaseFee retrieves the current blob base fee.
