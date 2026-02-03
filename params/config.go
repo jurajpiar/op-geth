@@ -455,10 +455,12 @@ var (
 
 // NetworkNames are user friendly names to use in the chain spec banner.
 var NetworkNames = map[string]string{
-	MainnetChainConfig.ChainID.String(): "mainnet",
-	SepoliaChainConfig.ChainID.String(): "sepolia",
-	HoleskyChainConfig.ChainID.String(): "holesky",
-	HoodiChainConfig.ChainID.String():   "hoodi",
+	MainnetChainConfig.ChainID.String():    "mainnet",
+	SepoliaChainConfig.ChainID.String():    "sepolia",
+	HoleskyChainConfig.ChainID.String():    "holesky",
+	HoodiChainConfig.ChainID.String():      "hoodi",
+	RSKMainnetChainConfig.ChainID.String(): "rsk-mainnet",
+	RSKTestnetChainConfig.ChainID.String(): "rsk-testnet",
 }
 
 // ChainConfig is the core config which determines the blockchain settings.
@@ -539,10 +541,14 @@ type ChainConfig struct {
 	// Various consensus engines
 	Ethash             *EthashConfig       `json:"ethash,omitempty"`
 	Clique             *CliqueConfig       `json:"clique,omitempty"`
+	MergedMining       *MergedMiningConfig `json:"mergedMining,omitempty"` // RSK merged mining with Bitcoin
 	BlobScheduleConfig *BlobScheduleConfig `json:"blobSchedule,omitempty"`
 
 	// Optimism config, nil if not active
 	Optimism *OptimismConfig `json:"optimism,omitempty"`
+
+	// RSK config, nil if not active
+	RSK *RSKConfig `json:"rsk,omitempty"`
 }
 
 // EthashConfig is the consensus engine configs for proof-of-work based sealing.
@@ -692,6 +698,8 @@ func (c *ChainConfig) Description() string {
 	}
 	banner += fmt.Sprintf("Chain ID:  %v (%s)\n", c.ChainID, network)
 	switch {
+	case c.RSK != nil && c.MergedMining != nil:
+		banner += "Consensus: RSK Merged Mining (Bitcoin)\n"
 	case c.Optimism != nil:
 		banner += "Consensus: Optimism\n"
 	case c.Ethash != nil:
@@ -1067,6 +1075,138 @@ func (c *ChainConfig) IsOptimismJovian(time uint64) bool {
 // IsOptimismPreBedrock returns true iff this is an optimism node & bedrock is not yet active
 func (c *ChainConfig) IsOptimismPreBedrock(num *big.Int) bool {
 	return c.IsOptimism() && !c.IsBedrock(num)
+}
+
+// IsRSK returns whether the node is an RSK node or not.
+func (c *ChainConfig) IsRSK() bool {
+	return c.RSK != nil
+}
+
+// IsRSKMainnet returns true if this is RSK mainnet (chainId 30).
+func (c *ChainConfig) IsRSKMainnet() bool {
+	return c.IsRSK() && c.ChainID != nil && c.ChainID.Uint64() == RSKMainnetChainID
+}
+
+// IsRSKTestnet returns true if this is RSK testnet (chainId 31).
+func (c *ChainConfig) IsRSKTestnet() bool {
+	return c.IsRSK() && c.ChainID != nil && c.ChainID.Uint64() == RSKTestnetChainID
+}
+
+// IsMergedMining returns whether this chain uses Bitcoin merged mining.
+func (c *ChainConfig) IsMergedMining() bool {
+	return c.MergedMining != nil
+}
+
+// IsRSKIP91 returns whether RSKIP-91 (STATICCALL) is active at the given block.
+func (c *ChainConfig) IsRSKIP91(num *big.Int) bool {
+	if !c.IsRSK() {
+		return false
+	}
+	// STATICCALL is available on RSK after RSKIP-91 activation
+	if c.IsRSKMainnet() {
+		return isBlockForked(RSKIP91MainnetBlock, num)
+	}
+	// Assume active from genesis on testnet
+	return true
+}
+
+// IsRSKIP120 returns whether RSKIP-120 (shift opcodes) is active at the given block.
+func (c *ChainConfig) IsRSKIP120(num *big.Int) bool {
+	if !c.IsRSK() {
+		return false
+	}
+	if c.IsRSKMainnet() {
+		return isBlockForked(RSKIP120MainnetBlock, num)
+	}
+	return true
+}
+
+// IsRSKIP125 returns whether RSKIP-125 (CREATE2) is active at the given block.
+func (c *ChainConfig) IsRSKIP125(num *big.Int) bool {
+	if !c.IsRSK() {
+		return false
+	}
+	if c.IsRSKMainnet() {
+		return isBlockForked(RSKIP125MainnetBlock, num)
+	}
+	return true
+}
+
+// IsRSKIP140 returns whether RSKIP-140 (EXTCODEHASH) is active at the given block.
+func (c *ChainConfig) IsRSKIP140(num *big.Int) bool {
+	if !c.IsRSK() {
+		return false
+	}
+	if c.IsRSKMainnet() {
+		return isBlockForked(RSKIP140MainnetBlock, num)
+	}
+	return true
+}
+
+// IsRSKIP151 returns whether RSKIP-151 (SELFBALANCE) is active at the given block.
+func (c *ChainConfig) IsRSKIP151(num *big.Int) bool {
+	if !c.IsRSK() {
+		return false
+	}
+	if c.IsRSKMainnet() {
+		return isBlockForked(RSKIP151MainnetBlock, num)
+	}
+	return true
+}
+
+// IsRSKIP152 returns whether RSKIP-152 (CHAINID) is active at the given block.
+func (c *ChainConfig) IsRSKIP152(num *big.Int) bool {
+	if !c.IsRSK() {
+		return false
+	}
+	if c.IsRSKMainnet() {
+		return isBlockForked(RSKIP152MainnetBlock, num)
+	}
+	return true
+}
+
+// IsRSKIP398 returns whether RSKIP-398 (PUSH0) is active at the given block.
+func (c *ChainConfig) IsRSKIP398(num *big.Int) bool {
+	if !c.IsRSK() {
+		return false
+	}
+	if c.IsRSKMainnet() {
+		return isBlockForked(RSKIP398MainnetBlock, num)
+	}
+	return true
+}
+
+// IsRSKIP412 returns whether RSKIP-412 (BASEFEE) is active at the given block.
+func (c *ChainConfig) IsRSKIP412(num *big.Int) bool {
+	if !c.IsRSK() {
+		return false
+	}
+	if c.IsRSKMainnet() {
+		return isBlockForked(RSKIP412MainnetBlock, num)
+	}
+	return true
+}
+
+// IsRSKIP445 returns whether RSKIP-445 (MCOPY) is active at the given block.
+func (c *ChainConfig) IsRSKIP445(num *big.Int) bool {
+	if !c.IsRSK() {
+		return false
+	}
+	if c.IsRSKMainnet() {
+		return isBlockForked(RSKIP445MainnetBlock, num)
+	}
+	return true
+}
+
+// IsRSKIP446 returns whether RSKIP-446 (TLOAD/TSTORE) is active at the given block.
+func (c *ChainConfig) IsRSKIP446(num *big.Int) bool {
+	if !c.IsRSK() {
+		return false
+	}
+	if c.IsRSKMainnet() {
+		return isBlockForked(RSKIP446MainnetBlock, num)
+	}
+	return true
 }
 
 // CheckCompatible checks whether scheduled fork transitions have been imported
@@ -1600,6 +1740,8 @@ type Rules struct {
 	IsOptimismCanyon, IsOptimismFjord                       bool
 	IsOptimismGranite, IsOptimismHolocene                   bool
 	IsOptimismIsthmus, IsOptimismJovian                     bool
+	// RSK-specific rules
+	IsRSK, IsRSKMainnet, IsRSKTestnet bool
 }
 
 // Rules ensures c's ChainID is not nil.
@@ -1641,6 +1783,10 @@ func (c *ChainConfig) Rules(num *big.Int, isMerge bool, timestamp uint64) Rules 
 		IsOptimismHolocene: isMerge && c.IsOptimismHolocene(timestamp),
 		IsOptimismIsthmus:  isMerge && c.IsOptimismIsthmus(timestamp),
 		IsOptimismJovian:   isMerge && c.IsOptimismJovian(timestamp),
+		// RSK
+		IsRSK:        c.IsRSK(),
+		IsRSKMainnet: c.IsRSKMainnet(),
+		IsRSKTestnet: c.IsRSKTestnet(),
 	}
 }
 
