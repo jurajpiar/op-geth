@@ -247,3 +247,23 @@ var (
 	ConsolidationQueueAddress = common.HexToAddress("0x0000BBdDc7CE488642fb579F8B00f3a590007251")
 	ConsolidationQueueCode    = common.FromHex("3373fffffffffffffffffffffffffffffffffffffffe1460d35760115f54807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff1461019a57600182026001905f5b5f82111560685781019083028483029004916001019190604d565b9093900492505050366060146088573661019a573461019a575f5260205ff35b341061019a57600154600101600155600354806004026004013381556001015f358155600101602035815560010160403590553360601b5f5260605f60143760745fa0600101600355005b6003546002548082038060021160e7575060025b5f5b8181146101295782810160040260040181607402815460601b815260140181600101548152602001816002015481526020019060030154905260010160e9565b910180921461013b5790600255610146565b90505f6002555f6003555b5f54807fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff141561017357505f5b6001546001828201116101885750505f61018e565b01600190035b5f555f6001556074025ff35b5f5ffd")
 )
+
+// RSK-specific gas parameters
+const (
+	// RSK Bridge precompile gas costs
+	RSKBridgeBaseGas       uint64 = 100000 // Base gas for bridge operations
+	RSKBridgeReadGas       uint64 = 10000  // Gas for read operations (get federation info, etc.)
+	RSKBridgeStateQueryGas uint64 = 50000  // Gas for state query operations
+
+	// RSK REMASC precompile gas costs
+	RSKRemascBaseGas    uint64 = 50000  // Base gas for REMASC operations
+	RSKRemascReadGas    uint64 = 10000  // Gas for read operations (get balances)
+	RSKRemascProcessGas uint64 = 100000 // Gas for processing rewards
+
+	// RSK HD Wallet Utils precompile gas costs
+	RSKHDWalletUtilsBaseGas       uint64 = 10000 // Base gas for HD wallet operations
+	RSKHDWalletUtilsDerivationGas uint64 = 5000  // Additional gas per derivation step
+
+	// RSK Block Hash Query precompile gas costs
+	RSKBlockHashQueryGas uint64 = 800 // Gas for block hash lookup (same as BLOCKHASH opcode)
+)

@@ -302,33 +302,50 @@ func init() {
 }
 
 func activePrecompiledContracts(rules params.Rules) PrecompiledContracts {
+	var base PrecompiledContracts
+
 	// note: the order of these switch cases is important
 	switch {
 	case rules.IsOptimismJovian:
-		return PrecompiledContractsJovian
+		base = PrecompiledContractsJovian
 	case rules.IsOptimismIsthmus:
-		return PrecompiledContractsIsthmus
+		base = PrecompiledContractsIsthmus
 	case rules.IsOptimismGranite:
-		return PrecompiledContractsGranite
+		base = PrecompiledContractsGranite
 	case rules.IsOptimismFjord:
-		return PrecompiledContractsFjord
+		base = PrecompiledContractsFjord
 	case rules.IsVerkle:
-		return PrecompiledContractsVerkle
+		base = PrecompiledContractsVerkle
 	case rules.IsOsaka:
-		return PrecompiledContractsOsaka
+		base = PrecompiledContractsOsaka
 	case rules.IsPrague:
-		return PrecompiledContractsPrague
+		base = PrecompiledContractsPrague
 	case rules.IsCancun:
-		return PrecompiledContractsCancun
+		base = PrecompiledContractsCancun
 	case rules.IsBerlin:
-		return PrecompiledContractsBerlin
+		base = PrecompiledContractsBerlin
 	case rules.IsIstanbul:
-		return PrecompiledContractsIstanbul
+		base = PrecompiledContractsIstanbul
 	case rules.IsByzantium:
-		return PrecompiledContractsByzantium
+		base = PrecompiledContractsByzantium
 	default:
-		return PrecompiledContractsHomestead
+		base = PrecompiledContractsHomestead
 	}
+
+	// Add RSK-specific precompiles if this is an RSK chain
+	if rules.IsRSK {
+		// Create a new map to avoid modifying the original
+		combined := make(PrecompiledContracts)
+		for k, v := range base {
+			combined[k] = v
+		}
+		for k, v := range PrecompiledContractsRSK {
+			combined[k] = v
+		}
+		return combined
+	}
+
+	return base
 }
 
 // ActivePrecompiledContracts returns a copy of precompiled contracts enabled with the current configuration.
@@ -338,30 +355,42 @@ func ActivePrecompiledContracts(rules params.Rules) PrecompiledContracts {
 
 // ActivePrecompiles returns the precompile addresses enabled with the current configuration.
 func ActivePrecompiles(rules params.Rules) []common.Address {
+	var base []common.Address
+
 	switch {
 	case rules.IsOptimismJovian:
-		return PrecompiledAddressesJovian
+		base = PrecompiledAddressesJovian
 	case rules.IsOptimismIsthmus:
-		return PrecompiledAddressesIsthmus
+		base = PrecompiledAddressesIsthmus
 	case rules.IsOptimismGranite:
-		return PrecompiledAddressesGranite
+		base = PrecompiledAddressesGranite
 	case rules.IsOptimismFjord:
-		return PrecompiledAddressesFjord
+		base = PrecompiledAddressesFjord
 	case rules.IsOsaka:
-		return PrecompiledAddressesOsaka
+		base = PrecompiledAddressesOsaka
 	case rules.IsPrague:
-		return PrecompiledAddressesPrague
+		base = PrecompiledAddressesPrague
 	case rules.IsCancun:
-		return PrecompiledAddressesCancun
+		base = PrecompiledAddressesCancun
 	case rules.IsBerlin:
-		return PrecompiledAddressesBerlin
+		base = PrecompiledAddressesBerlin
 	case rules.IsIstanbul:
-		return PrecompiledAddressesIstanbul
+		base = PrecompiledAddressesIstanbul
 	case rules.IsByzantium:
-		return PrecompiledAddressesByzantium
+		base = PrecompiledAddressesByzantium
 	default:
-		return PrecompiledAddressesHomestead
+		base = PrecompiledAddressesHomestead
 	}
+
+	// Add RSK-specific precompile addresses if this is an RSK chain
+	if rules.IsRSK {
+		combined := make([]common.Address, 0, len(base)+len(PrecompiledAddressesRSK))
+		combined = append(combined, base...)
+		combined = append(combined, PrecompiledAddressesRSK...)
+		return combined
+	}
+
+	return base
 }
 
 // RunPrecompiledContract runs and evaluates the output of a precompiled contract.
